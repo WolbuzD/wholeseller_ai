@@ -29,9 +29,15 @@ def get_cached_property(property_id):
 app = FastAPI(title="Wholesaler AI API", version="1.0.0")
 
 # Enable CORS for React frontend
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",  # For local development
+        "https://*.vercel.app",   # For Vercel deployment
+        "https://*.netlify.app",  # For Netlify deployment
+        "https://*.up.railway.app" # For Railway deployment
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
