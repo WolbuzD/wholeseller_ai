@@ -2,9 +2,9 @@
 
 A full-stack web application that helps real estate wholesalers **identify motivated sellers** and generate **AI-powered personalized outreach messages**.
 
-![GitHub last commit](https://img.shields.io/github/last-commit/your-username/wholeseller-ai)  
-![GitHub issues](https://img.shields.io/github/issues/your-username/wholeseller-ai)  
-![GitHub stars](https://img.shields.io/github/stars/your-username/wholeseller-ai?style=social)
+![GitHub last commit](https://img.shields.io/github/last-commit/WolbuzD/wholeseller_ai)  
+![GitHub issues](https://img.shields.io/github/issues/WolbuzD/wholeseller_ai)  
+![GitHub stars](https://img.shields.io/github/stars/WolbuzD/wholeseller_ai?style=social)
 
 ---
 
