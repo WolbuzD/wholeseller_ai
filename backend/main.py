@@ -30,13 +30,16 @@ app = FastAPI(title="Wholesaler AI API", version="1.0.0")
 
 # Enable CORS for React frontend
 
+# Enable CORS for React frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",  # For local development
-        "https://*.vercel.app",   # For Vercel deployment
-        "https://*.netlify.app",  # For Netlify deployment
-        "https://*.up.railway.app" # For Railway deployment
+        "https://wholeseller-ai.vercel.app",  # Your specific domain
+        "https://wholeseller-ai-git-main-wolbuzs-projects.vercel.app",  # Git branch domain
+        "https://*.vercel.app",   # All Vercel domains
+        "https://*.netlify.app",  
+        "https://*.up.railway.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
