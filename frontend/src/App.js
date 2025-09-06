@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
+import FeedbackSection from './FeedbackSection';
 
 const API_BASE = 'https://wholesellerai-production.up.railway.app';
 
@@ -398,6 +399,9 @@ function App() {
             </div>
           )}
         </div>
+
+        {/* Community Feedback Section */}
+        <FeedbackSection API_BASE={API_BASE} />
       </div>
     </div>
   );

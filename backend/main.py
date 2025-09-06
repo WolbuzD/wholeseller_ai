@@ -5,6 +5,9 @@ from typing import List, Optional
 import os
 from anthropic import Anthropic  
 from dotenv import load_dotenv
+import json
+from datetime import datetime, timedelta
+from pathlib import Path
 
 load_dotenv()
 
@@ -27,8 +30,6 @@ def get_cached_property(property_id):
     return next((p for p in MOCK_PROPERTIES if p["id"] == property_id), None)
 
 app = FastAPI(title="Wholesaler AI API", version="1.0.0")
-
-# Enable CORS for React frontend
 
 # Enable CORS for React frontend
 app.add_middleware(
@@ -78,6 +79,30 @@ class PropertyFilter(BaseModel):
 class MessageRequest(BaseModel):
     property_id: int
     message_type: str = "initial_contact"
+
+class FeedbackRequest(BaseModel):
+    type: str
+    message: str
+    submitter_name: str = "Anonymous"
+    timestamp: str
+
+# Feedback storage
+FEEDBACK_FILE = Path("feedback.json")
+
+def load_feedback():
+    """Load feedback from JSON file"""
+    if FEEDBACK_FILE.exists():
+        try:
+            with open(FEEDBACK_FILE, 'r') as f:
+                return json.load(f)
+        except:
+            return []
+    return []
+
+def save_feedback(feedback_list):
+    """Save feedback to JSON file"""
+    with open(FEEDBACK_FILE, 'w') as f:
+        json.dump(feedback_list, f, indent=2)
 
 # Mock property data
 MOCK_PROPERTIES = [
@@ -379,6 +404,76 @@ async def get_situation_types():
             {"value": "tax_delinquent", "label": "Tax Delinquent", "description": "Behind on property taxes"}
         ]
     }
+
+@app.post("/api/feedback")
+async def submit_feedback(feedback: FeedbackRequest):
+    """Submit new feedback from users"""
+    try:
+        # Load existing feedback
+        all_feedback = load_feedback()
+        
+        # Add new feedback
+        new_feedback = {
+            "type": feedback.type,
+            "message": feedback.message,
+            "submitter_name": feedback.submitter_name,
+            "timestamp": feedback.timestamp,
+            "id": len(all_feedback) + 1
+        }
+        
+        all_feedback.append(new_feedback)
+        
+        # Save to file
+        save_feedback(all_feedback)
+        
+        return {"message": "Feedback submitted successfully", "id": new_feedback["id"]}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to submit feedback: {str(e)}")
+
+@app.get("/api/feedback")
+async def get_feedback():
+    """Get all feedback for display"""
+    try:
+        feedback = load_feedback()
+        # Sort by timestamp, newest first
+        feedback.sort(key=lambda x: x["timestamp"], reverse=True)
+        return feedback
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch feedback: {str(e)}")
+
+@app.get("/api/feedback/stats")
+async def get_feedback_stats():
+    """Get feedback statistics for admin/demo purposes"""
+    try:
+        feedback = load_feedback()
+        
+        stats = {
+            "total_feedback": len(feedback),
+            "by_type": {},
+            "recent_count": 0
+        }
+        
+        # Count by type
+        for item in feedback:
+            feedback_type = item.get("type", "general")
+            stats["by_type"][feedback_type] = stats["by_type"].get(feedback_type, 0) + 1
+        
+        # Count recent feedback (last 7 days)
+        week_ago = datetime.now() - timedelta(days=7)
+        
+        for item in feedback:
+            try:
+                item_date = datetime.fromisoformat(item["timestamp"].replace('Z', '+00:00'))
+                if item_date > week_ago:
+                    stats["recent_count"] += 1
+            except:
+                pass
+        
+        return stats
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch stats: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
